@@ -12,6 +12,10 @@ import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -29,11 +33,14 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
     private ScaleGestureDetector scaleGestureDetector;
     private int score = 0;
 
+    Timer gameTimer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
         newGame();
 
         gestureDetector = new GestureDetector(this, new GestureListener());
@@ -46,6 +53,22 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         commandCardView.setOnTouchListener(this);
     }
 
+    public void setTimer() {
+        gameTimer = new Timer();
+        TimerTask gameRound = new TimerTask() {
+            @Override
+            public void run() {
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), "You Lose", Toast.LENGTH_LONG).show();
+                    }
+                });
+            }
+        };
+        gameTimer.schedule(gameRound, 3000);
+    }
+
     public void setRandomCommand() {
         randomNum = (int)(Math.random() * commands.length);
         commandTextView.setText(commands[randomNum]);
@@ -55,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         score = 0;
         counterTextView.setText(String.format("Score: %d", score));
         setRandomCommand();
+        setTimer();
     }
 
 
@@ -62,6 +86,8 @@ public class MainActivity extends AppCompatActivity implements View.OnTouchListe
         score++;
         counterTextView.setText(String.format("Score: %d", score));
         setRandomCommand();
+        gameTimer.cancel();
+        setTimer();
     }
 
 
